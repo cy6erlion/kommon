@@ -1,3 +1,4 @@
 //! kommon tools for working with FFI
 
-pub mod result;
+pub use result::{FFIJSON, FFIResult};
+mod result;
