@@ -7,3 +7,5 @@ pub use error::Error;
 
 mod gender;
 mod error;
+#[cfg(feature = "ffi")]
+pub mod ffi;
