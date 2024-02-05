@@ -1,46 +1,56 @@
 //! Gender type
 
 use crate::Error;
-use serde::{Deserialize, Serialize, de::Deserializer};
 use std::fmt;
 use std::str::FromStr;
 
+#[cfg(feature = "serde")]
+use serde::{de::Deserializer, ser::Serializer, Deserialize};
+
+#[cfg(feature = "rusqlite")]
+use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
+
 /// A persons gender
-#[derive(Debug, PartialEq, Serialize)]
-pub enum Gender{
+#[derive(PartialEq, Debug)]
+pub enum Gender {
     /// Male gender
     Male,
     /// Female gender
     Female,
     /// Other type of gender
-    Other
+    Other,
 }
 
 impl Gender {
     /// Deserialize
+    #[cfg(feature = "serde")]
     pub fn deserialize<'de, D>(deserializer: D) -> Result<Gender, D::Error>
     where
         D: Deserializer<'de>,
     {
         let buf = String::deserialize(deserializer)?;
+        let gender: Gender = buf.trim().parse().map_err(serde::de::Error::custom)?;
+        Ok(gender)
+    }
 
-        match buf.as_str() {
-            "Male" | "male" => Ok(Gender::Male),
-	    "Female" | "female" => Ok(Gender::Female),
-	    "Other" | "other" => Ok(Gender::Other),
-            _ => Err(Error::Gender).map_err(serde::de::Error::custom),
-        }
+    /// Serialize
+    #[cfg(feature = "serde")]
+    pub fn serialize<S>(gender: &Gender, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&gender.to_string())
     }
 }
 
 impl fmt::Display for Gender {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let media_type = match self {
+        let status = match self {
             Gender::Male => "Male",
-	    Gender::Female => "Female",
-	    Gender::Other => "Other",
+            Gender::Female => "Female",
+            Gender::Other => "Other",
         };
-        writeln!(f, "{media_type}")
+        writeln!(f, "{status}")
     }
 }
 
@@ -49,11 +59,27 @@ impl FromStr for Gender {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
-            "Male" | "male" => Ok(Gender::Male),
-	    "Female" | "female" => Ok(Gender::Female),
-	    "Other" | "other" => Ok(Gender::Other),
-	    _ => Err(Error::Gender),
+            "Male" => Ok(Gender::Male),
+            "Female" => Ok(Gender::Female),
+            "Other" => Ok(Gender::Other),
+            _ => Err(Error::Gender),
         }
+    }
+}
+
+#[cfg(feature = "rusqlite")]
+impl ToSql for Gender {
+    fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+        Ok(self.to_string().into())
+    }
+}
+#[cfg(feature = "rusqlite")]
+impl FromSql for Gender {
+    fn column_result(value: ValueRef<'_>) -> FromSqlResult<Self> {
+        value
+            .as_str()?
+            .parse()
+            .map_err(|e| FromSqlError::Other(Box::new(e)))
     }
 }
 
@@ -61,20 +87,25 @@ impl FromStr for Gender {
 mod test {
     use super::*;
 
+    #[cfg(feature = "serde")]
+    use serde::{Deserialize, Serialize};
+
+    #[cfg(feature = "serde")]
     #[derive(Deserialize, Debug, PartialEq, Serialize)]
     struct Med {
         #[serde(deserialize_with = "Gender::deserialize")]
-        pub media_type: Gender,
+        #[serde(serialize_with = "Gender::serialize")]
+        gender: Gender,
     }
 
+    #[cfg(feature = "serde")]
     #[test]
-    fn test_desert_media_type() {
+    fn test_gender() {
         let mt = Med {
-            media_type: Gender::Male,
+            gender: Gender::Male,
         };
         let j = serde_json::to_string(&mt).unwrap();
         let mt2: Med = serde_json::from_str(&j).unwrap();
-
-        assert_eq!(mt, mt2);
+        assert_eq!(mt.gender.to_string(), mt2.gender.to_string());
     }
 }
