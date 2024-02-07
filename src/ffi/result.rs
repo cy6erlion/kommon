@@ -24,9 +24,14 @@ impl FFIResult {
         CString::new("{\"ffiOk\":true}").unwrap().into_raw()
     }
 
+    /// A none result
+    pub fn none() -> FFIJSON {
+        CString::new("{\"ffinone\":true}").unwrap().into_raw()
+    }
+
     /// Export error as a FFI compatible JSON string
     pub fn error<E: Error>(err: E) -> FFIJSON {
-        let err_msg = format!("{{\"ffierror\": {err}}}");
+        let err_msg = format!("{{\"ffiError\": {err}}}");
         CString::new(err_msg).unwrap().into_raw()
     }
 }
