@@ -11,7 +11,7 @@ use serde::{de::Deserializer, ser::Serializer, Deserialize};
 use rusqlite::types::{FromSql, FromSqlError, FromSqlResult, ToSql, ToSqlOutput, ValueRef};
 
 /// A persons gender
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Gender {
     /// Male gender
     Male,
