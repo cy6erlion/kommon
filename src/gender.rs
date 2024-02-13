@@ -45,12 +45,7 @@ impl Gender {
 
 impl fmt::Display for Gender {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let status = match self {
-            Gender::Male => "Male",
-            Gender::Female => "Female",
-            Gender::Other => "Other",
-        };
-        writeln!(f, "{status}")
+        fmt::Debug::fmt(self, f)
     }
 }
 
