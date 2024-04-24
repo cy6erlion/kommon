@@ -2,10 +2,13 @@
 
 #![warn(missing_docs, unreachable_pub, future_incompatible, rust_2018_idioms)]
 
-pub use gender::Gender;
 pub use error::Error;
+pub use gender::Gender;
 
-mod gender;
 mod error;
 #[cfg(feature = "ffi")]
 pub mod ffi;
+mod gender;
+
+/// Entity unique identifier
+pub type ID = i32;
