@@ -12,3 +12,6 @@ mod gender;
 
 /// Entity unique identifier
 pub type ID = i32;
+
+/// Schema version
+pub type VERSION = i16;
