@@ -7,5 +7,5 @@ edition = "2021"
 ffi = ["serde", "serde_json"] # kommon tools for working with FFI
 [dependencies]
 serde = { version = "1.0.196", features = ["derive"], optional = true } # A generic serialization/deserialization framework
-rusqlite = { version = "0.30.0", features = ["bundled", "chrono"], optional = true} #  Ergonomic wrapper for SQLite
+rusqlite = { version = "0.31.0", features = ["bundled", "chrono"], optional = true} #  Ergonomic wrapper for SQLite
 serde_json = {version = "1.0.113", optional = true}
